@@ -1,15 +1,19 @@
 ################################################################################
 # Description: Collect attributes of yoshinoya stores in Japan
-# day, holiday, holidayHours, holidayHoursIsRegular, intervals
+# Attribute includes 'storeid','brand','name','lat','lon','postalCode','address',
+#                    'DOW_open', 'DOW_close' (DOW implies day of the week)
 ################################################################################
 
 import requests
 import csv
 
 from bs4 import BeautifulSoup
+from requests.exceptions import HTTPError
+
 
 def get_data_yoshinoya(storeid):
     """
+    Get the data of the store with given storeid
 
     Parameters
     ----------
@@ -19,6 +23,8 @@ def get_data_yoshinoya(storeid):
     -------
     None if the storeid does not exist
     dict with following keys
+    'storeid','brand','name','lat','lon','postalCode','address',
+    'DOW_open', 'DOW_close' (DOW implies day of the week)
     """
 
     store_details = {'storeid': storeid}
@@ -27,9 +33,13 @@ def get_data_yoshinoya(storeid):
 
     try:
         r = requests.get(url, allow_redirects=False)
-        r.raise_for_status()
 
-    except:
+        # Catch responses > 300
+        if r.status_code >= 300:
+            raise HTTPError
+
+    except HTTPError:
+        print("Page not found. Status code is not 200.")
         return None
 
     soup = BeautifulSoup(r.text, 'html.parser')
@@ -46,13 +56,13 @@ def get_data_yoshinoya(storeid):
 
     store_details['name'] = name.strip(' ')
 
-    # Get lat and lng
+    # Get lat and lon
     geo = soup.find('meta', {'name':'geo.position'})
 
-    latlng = geo['content'].split(';')
+    latlon = geo['content'].split(';')
 
-    store_details['lat'] = latlng[0]
-    store_details['lng'] = latlng[1]
+    store_details['lat'] = latlon[0]
+    store_details['lon'] = latlon[1]
 
     # Get location attributes
     location = soup.find('address')
@@ -69,7 +79,7 @@ def get_data_yoshinoya(storeid):
     hours = soup.find('div',
             {'class': 'c-location-hours-details-wrapper js-location-hours-table'})
 
-    # Convert the special characters in the list (in string format) from js format to python format
+    # Convert the special characters in the list (in string format) from js to python format
     for old, new in [('true', 'True'),('false', 'False')]:
         hours['data-days'] = hours['data-days'].replace(old, new)
 
@@ -89,6 +99,7 @@ def get_data_yoshinoya(storeid):
             openingTime = None
             closingTime = None
 
+        # Create key in the form of 'MON_open', 'MON_close', 'TUE_open', etc.
         store_details[f'{dayOfTheWeek[:3]}_open'] = openingTime
         store_details[f'{dayOfTheWeek[:3]}_close'] = closingTime
 
@@ -96,14 +107,32 @@ def get_data_yoshinoya(storeid):
 
 
 def main():
+    """
+    Get details of the store with given csv storing the storeid of all yoshinoya stores
+    """
 
-    with open('yoshinoya_id.csv') as yoshinoya_id:
+    outFile = 'product/yoshinoya_rawdata.csv'
+
+    with open('data/yoshinoya_id.csv') as yoshinoya_id:
+
+        # Reader to read store id
         id_reader = csv.reader(yoshinoya_id)
 
         # Skip the headers
         header = next(yoshinoya_id, None)
 
-        with open('yoshinoya_rawdata.csv', 'w', newline='') as csvfile:
+        # Keys from the get_data function
+        headers = ['storeid','brand','name','lat','lon','postalCode','address',
+                    'MON_open','MON_close','TUE_open','TUE_close','WED_open','WED_close',
+                    'THU_open','THU_close','FRI_open','FRI_close','SAT_open','SAT_close',
+                    'SUN_open','SUN_close']
+
+        with open(outFile, 'w', newline='') as csvfile:
+
+            writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',fieldnames=headers)
+
+            # Write the headers
+            writer.writeheader()
 
             for row in id_reader:
 
@@ -117,8 +146,6 @@ def main():
 
                     print(f"failed to request the page with storeid {storeid}")
                     continue
-
-                writer = csv.DictWriter(csvfile, fieldnames = store_row.keys())
 
                 writer.writerow(store_row)
 

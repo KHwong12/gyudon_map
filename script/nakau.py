@@ -84,7 +84,7 @@ def get_data_sukiya(storeid):
 
     r_api = requests.get(api_url).json()
 
-    # data of the store (in dict format) is bonded in a list, thus [0] is needed
+    # data of the store (in dict format) is bounded inside a list, thus [0] is needed
     datalist = r_api['mapdata'][0]
 
     store_details['lat'] = datalist['lat']
@@ -100,20 +100,20 @@ def get_data_sukiya(storeid):
 
 def main():
     """
-    Get the name of the shop by brute-force searching the id of the shop
+    Get the details of the shop by brute-force searching the id of the shop
     """
 
-    # minimum and maximum storeid through manual searching
+    # Approximate minimum and maximum storeid are searched manually
     storeid_min = 2050
     storeid_max = 2600
 
-    filename = 'nakau_rawdata.csv'
+    outFile = 'nakau_rawdata.csv'
 
     # Keys from the get_data function
     headers = ['storeid','brand','name','lat','lon','postalCode','address',
                 'business_hour1','business_hour2','business_hour3']
 
-    with open(filename, 'w', newline='') as csvfile:
+    with open(outFile, 'w', newline='') as csvfile:
 
         writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',fieldnames=headers)
 
