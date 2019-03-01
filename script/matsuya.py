@@ -1,10 +1,11 @@
 ################################################################################
 # Description: Collect attributes of matsuya stores in Japan
-#
+# Attribute includes 'storeid','brand','name','lat','lon','postalCode','address',
+#                    'business_hour'
 ################################################################################
 
 """
-List of APIs from the script of webpage
+TODO: Investigate the other APIs from the script of webpage
 https://pkg.navitime.co.jp/matsuyafoods/api/proxy1/address/list
 
 https://pkg.navitime.co.jp/matsuyafoods/api/proxy1/transport/node/list
@@ -12,27 +13,34 @@ https://pkg.navitime.co.jp/matsuyafoods/api/proxy1/transport/node/list?type=stat
 
 https://pkg.navitime.co.jp/matsuyafoods/api/proxy2/shop?code={}
 https://pkg.navitime.co.jp/matsuyafoods/api/proxy2/shop/list
-pkg.navitime.co.jp/matsuyafoods/api/proxy1/weather
-pkg.navitime.co.jp/matsuyafoods/api/proxy1/route/shape
+
+https://pkg.navitime.co.jp/matsuyafoods/api/proxy1/weather
+
+https://pkg.navitime.co.jp/matsuyafoods/api/proxy1/route/shape
 """
 
 import requests
 import csv
 
 from bs4 import BeautifulSoup
+from requests.exceptions import HTTPError
+
 
 def get_data_matsuya(storeid):
     """
+    Get the data of the store with given storeid
 
     Parameters
     ----------
-    storeid
+    storeid (int)
 
     Returns
     -------
     None if the storeid does not exist
 
     dict with following keys
+    'storeid','brand','name','lat','lon','postalCode','address',
+    'business_hour1','business_hour2','business_hour3'
     """
 
     # Add the leading zeros to the code
@@ -47,6 +55,7 @@ def get_data_matsuya(storeid):
         r = requests.get(url, allow_redirects=False)
         r_api = requests.get(url_api, allow_redirects=False)
 
+        # Catch HTTP404 error
         r.raise_for_status()
         r_api.raise_for_status()
 
@@ -86,18 +95,26 @@ def get_data_matsuya(storeid):
     return store_details
 
 def main():
+    """
+    Get the details of the shop by brute-force searching the id of the shop
+    """
 
-    # minimum and maximum shopid through manual searching
+    # Approximate minimum and maximum storeid are searched manually
     storeid_min = 1
     storeid_max = 1402
 
-    with open('matsuya_rawdata2.csv', 'w', newline='') as csvfile:
+    outFile = 'product/matsuya_rawdata.csv'
 
-        writer = csv.writer(csvfile)
+    # Keys from the get_data function
+    headers = ['storeid','brand','name','lat','lon','postalCode','address',
+                'business_hour']
 
-        # Write the headings
-        writer.writerow(['storeid','brand','name','lat','lon','postalCode','address',
-                        'business_hour'])
+    with open(outFile, 'w', newline='') as csvfile:
+
+        writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',fieldnames=headers)
+
+        # Write the headers
+        writer.writeheader()
 
         for storeid in range(storeid_min,storeid_max+1):
 
@@ -109,10 +126,6 @@ def main():
 
                 print(f"failed to request the page with storeid {storeid}")
                 continue
-
-            print(store_row)
-
-            writer = csv.DictWriter(csvfile, fieldnames = store_row.keys())
 
             writer.writerow(store_row)
 

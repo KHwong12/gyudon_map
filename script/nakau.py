@@ -122,6 +122,8 @@ def main():
 
         for storeid in range(storeid_min,storeid_max+1):
 
+            print(f"Processing {storeid}...")
+
             store_row = get_data_sukiya(storeid)
 
             if store_row == None:
@@ -132,6 +134,7 @@ def main():
             writer.writerow(store_row)
 
         csvfile.close()
+
 
 if __name__ == '__main__':
     main()
