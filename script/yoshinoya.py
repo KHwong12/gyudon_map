@@ -111,9 +111,9 @@ def main():
     Get details of the store with given csv storing the storeid of all yoshinoya stores
     """
 
-    outFile = 'product/yoshinoya_rawdata.csv'
+    outFile = r'../product/yoshinoya_rawdata.csv'
 
-    with open('data/yoshinoya_id.csv') as yoshinoya_id:
+    with open(r'../data/yoshinoya_id.csv') as yoshinoya_id:
 
         # Reader to read store id
         id_reader = csv.reader(yoshinoya_id)

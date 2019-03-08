@@ -31,7 +31,7 @@ def get_data_sukiya(storeid):
     # Initialise dict
     store_details = {'storeid': storeid}
 
-    url = f'https://maps.sukiya.jp/jp/detail/{shopid}.html'
+    url = f'https://maps.sukiya.jp/jp/detail/{storeid}.html'
 
     try:
         r = requests.get(url, allow_redirects=False)
@@ -81,7 +81,7 @@ def get_data_sukiya(storeid):
     """
 
     # Query the API by the name of the shop
-    api_url = f'https://maps.sukiya.jp/api/search/?name={name}'
+    api_url = 'https://maps.sukiya.jp/api/search/?name={}'.format(store_details['name'])
 
     r_api = requests.get(api_url).json()
 
@@ -105,10 +105,10 @@ def main():
     """
 
     # Approximate minimum and maximum storeid are searched manually
-    shopid_min = 1
-    shopid_max = 2100
+    storeid_min = 1
+    storeid_max = 2100
 
-    outFile = 'product/sukiya_rawdata.csv'
+    outFile = r'../product/sukiya_rawdata.csv'
 
     # Keys from the get_data function
     headers = ['storeid','brand','name','lat','lon','postalCode','address',
@@ -124,7 +124,7 @@ def main():
         for storeid in range(storeid_min,storeid_max+1):
 
             print(f"Processing {storeid}...")
-            
+
             store_row = get_data_sukiya(storeid)
 
             if store_row == None:

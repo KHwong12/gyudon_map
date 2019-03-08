@@ -103,7 +103,7 @@ def main():
     storeid_min = 1
     storeid_max = 1402
 
-    outFile = 'product/matsuya_rawdata.csv'
+    outFile = r'../product/matsuya_rawdata.csv'
 
     # Keys from the get_data function
     headers = ['storeid','brand','name','lat','lon','postalCode','address',

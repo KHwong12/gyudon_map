@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from requests.exceptions import HTTPError
 
 
-def get_data_sukiya(storeid):
+def get_data_nakau(storeid):
     """
     Get the data of the store with given storeid
 
@@ -107,7 +107,7 @@ def main():
     storeid_min = 2050
     storeid_max = 2600
 
-    outFile = 'nakau_rawdata.csv'
+    outFile = r'../product/nakau_rawdata.csv'
 
     # Keys from the get_data function
     headers = ['storeid','brand','name','lat','lon','postalCode','address',
@@ -124,7 +124,7 @@ def main():
 
             print(f"Processing {storeid}...")
 
-            store_row = get_data_sukiya(storeid)
+            store_row = get_data_nakau(storeid)
 
             if store_row == None:
 
