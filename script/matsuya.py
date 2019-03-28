@@ -1,3 +1,5 @@
+#coding=utf-8
+
 ################################################################################
 # Description: Collect attributes of matsuya stores in Japan
 # Attribute includes 'storeid','brand','name','lat','lon','postalCode','address',

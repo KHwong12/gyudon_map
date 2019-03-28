@@ -1,3 +1,5 @@
+#coding=utf-8
+
 ################################################################################
 # Description: Get the id number of Yoshinoya stores by recursively 'clicking'
 #              the pages listing all prefectures, then all cities
