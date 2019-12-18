@@ -1,10 +1,10 @@
-#coding=utf-8
+# coding=utf-8
 
-################################################################################
+#############################################################################
 # Description: Collect attributes of nakau stores in Japan
-# Attribute includes 'storeid','brand','name','lat','lon','postalCode','address',
-#                    'business_hour1','business_hour2','business_hour3'
-################################################################################
+# Attribute includes 'storeid','brand','name','lat','lon','postalCode',
+# 'address', 'business_hour1','business_hour2','business_hour3'
+#############################################################################
 
 import requests
 import csv
@@ -59,17 +59,17 @@ def get_data_nakau(storeid):
     location = soup.find('dl', {"class": "address"})
 
     # Extract the google map link of the details
-    maplink = location.div.extract()
+    # maplink = location.div.extract()
+    #
+    # split the url to google map, which is in the format of
+    # http://maps.google.co.jp/maps?q=34.7429584410997,134.84215994866
+    #
+    # latlng = maplink.a['href'].strip('http://maps.google.co.jp/maps?q=').split(',')
+    #
+    # lat = latlng[0]
+    # lon = latlng[1]
 
-    """
-    # split the url to google map, which is in the format on http://maps.google.co.jp/maps?q=34.7429584410997,134.84215994866
-    latlng = maplink.a['href'].strip('http://maps.google.co.jp/maps?q=').split(',')
-
-    lat = latlng[0]
-    lon = latlng[1]
-    """
-
-    # Extract the postalCode, which is stored in the span class of the address data list
+    # Extract postalCode, stored in the span class of the address data list
     postal = location.span.extract()
 
     store_details['postalCode'] = postal.text.strip('〒')
@@ -86,7 +86,7 @@ def get_data_nakau(storeid):
 
     r_api = requests.get(api_url).json()
 
-    # data of the store (in dict format) is bounded inside a list, thus [0] is needed
+    # data of store (in dict format) is bounded inside list, thus [0] is needed
     datalist = r_api['mapdata'][0]
 
     store_details['lat'] = datalist['lat']
@@ -106,29 +106,30 @@ def main():
     """
 
     # Approximate minimum and maximum storeid are searched manually
-    storeid_min = 2050
-    storeid_max = 2600
+    STOREID_MIN = 2050
+    STOREID_MAX = 2600
 
     outFile = r'../product/nakau_rawdata.csv'
 
     # Keys from the get_data function
-    headers = ['storeid','brand','name','lat','lon','postalCode','address',
-                'business_hour1','business_hour2','business_hour3']
+    headers = ['storeid', 'brand', 'name', 'lat', 'lon', 'postalCode',
+               'address', 'business_hour1', 'business_hour2', 'business_hour3']
 
     with open(outFile, 'w', newline='') as csvfile:
 
-        writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',fieldnames=headers)
+        writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',
+                                fieldnames=headers)
 
         # Write the headers
         writer.writeheader()
 
-        for storeid in range(storeid_min,storeid_max+1):
+        for storeid in range(STOREID_MIN, STOREID_MAX+1):
 
             print(f"Processing {storeid}...")
 
             store_row = get_data_nakau(storeid)
 
-            if store_row == None:
+            if store_row is None:
 
                 print(f"failed to request the page with storeid {storeid}")
                 continue

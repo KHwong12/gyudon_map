@@ -1,10 +1,10 @@
-#coding=utf-8
+# coding=utf-8
 
-################################################################################
+###############################################################################
 # Description: Collect attributes of yoshinoya stores in Japan
-# Attribute includes 'storeid','brand','name','lat','lon','postalCode','address',
-#                    'DOW_open', 'DOW_close' (DOW implies day of the week)
-################################################################################
+# Attribute includes 'storeid', 'brand', 'name', 'lat', 'lon', 'postalCode',
+#                    'address', 'DOW_open', 'DOW_close'(DOW: day of the week)
+###############################################################################
 
 import requests
 import csv
@@ -26,7 +26,7 @@ def get_data_yoshinoya(storeid):
     None if the storeid does not exist
     dict with following keys
     'storeid','brand','name','lat','lon','postalCode','address',
-    'DOW_open', 'DOW_close' (DOW implies day of the week)
+    'DOW_open', 'DOW_close' (DOW: day of the week)
     """
 
     store_details = {'storeid': storeid}
@@ -59,7 +59,7 @@ def get_data_yoshinoya(storeid):
     store_details['name'] = name.strip(' ')
 
     # Get lat and lon
-    geo = soup.find('meta', {'name':'geo.position'})
+    geo = soup.find('meta', {'name': 'geo.position'})
 
     latlon = geo['content'].split(';')
 
@@ -79,10 +79,10 @@ def get_data_yoshinoya(storeid):
 
     # Get day-specific opening hours
     hours = soup.find('div',
-            {'class': 'c-location-hours-details-wrapper js-location-hours-table'})
+                      {'class': 'c-location-hours-details-wrapper js-location-hours-table'})
 
-    # Convert the special characters in the list (in string format) from js to python format
-    for old, new in [('true', 'True'),('false', 'False')]:
+    # Convert special characters in list (string format) from js to python
+    for old, new in [('true', 'True'), ('false', 'False')]:
         hours['data-days'] = hours['data-days'].replace(old, new)
 
     # Convert the opening hours' list from string to array
@@ -96,7 +96,7 @@ def get_data_yoshinoya(storeid):
             openingTime = day['intervals'][0]['start']
             closingTime = day['intervals'][0]['end']
 
-        # Attribute 'intervals' is an empty list if the store is closed on that day
+        # Attribute 'intervals' is empty if the store is closed on that day
         except IndexError:
             openingTime = None
             closingTime = None
@@ -110,7 +110,8 @@ def get_data_yoshinoya(storeid):
 
 def main():
     """
-    Get details of the store with given csv storing the storeid of all yoshinoya stores
+    Get details of the store with given csv storing the storeid of all
+    yoshinoya stores
     """
 
     outFile = r'../product/yoshinoya_rawdata.csv'
@@ -124,14 +125,15 @@ def main():
         header = next(yoshinoya_id, None)
 
         # Keys from the get_data function
-        headers = ['storeid','brand','name','lat','lon','postalCode','address',
-                    'MON_open','MON_close','TUE_open','TUE_close','WED_open','WED_close',
-                    'THU_open','THU_close','FRI_open','FRI_close','SAT_open','SAT_close',
-                    'SUN_open','SUN_close']
+        headers = ['storeid', 'brand', 'name', 'lat', 'lon', 'postalCode',
+                   'address', 'MON_open', 'MON_close', 'TUE_open', 'TUE_close',
+                   'WED_open', 'WED_close', 'THU_open', 'THU_close', 'FRI_open',
+                   'FRI_close', 'SAT_open', 'SAT_close', 'SUN_open', 'SUN_close']
 
         with open(outFile, 'w', newline='') as csvfile:
 
-            writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',fieldnames=headers)
+            writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',
+                                    fieldnames=headers)
 
             # Write the headers
             writer.writeheader()
@@ -144,7 +146,7 @@ def main():
 
                 store_row = get_data_yoshinoya(storeid)
 
-                if store_row == None:
+                if store_row is None:
 
                     print(f"failed to request the page with storeid {storeid}")
                     continue

@@ -1,9 +1,9 @@
-#coding=utf-8
+# coding=utf-8
 
-################################################################################
+###############################################################################
 # Description: Get the id number of Yoshinoya stores by recursively 'clicking'
 #              the pages listing all prefectures, then all cities
-################################################################################
+###############################################################################
 
 import requests
 import csv
@@ -44,7 +44,7 @@ with open(outFile, 'w', newline='') as csvfile:
 
             print(f"Processing stores in {pre_name} / {city_name}")
 
-            # Collect the store details if there is only one store in the region
+            # Collect store details if there is only one store in the region
             if city['data-count'] == '(1)':
 
                 storeid = city['href'].strip('../')

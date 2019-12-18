@@ -1,10 +1,10 @@
-#coding=utf-8
+# coding=utf-8
 
-################################################################################
+##############################################################################
 # Description: Collect attributes of matsuya stores in Japan
-# Attribute includes 'storeid','brand','name','lat','lon','postalCode','address',
-#                    'business_hour'
-################################################################################
+# Attribute includes 'storeid','brand','name','lat','lon','postalCode',
+#                    'address', 'business_hour'
+##############################################################################
 
 """
 TODO: Investigate the other APIs from the script of webpage
@@ -25,11 +25,10 @@ import requests
 import csv
 
 from bs4 import BeautifulSoup
-from requests.exceptions import HTTPError
 
 
 def get_data_matsuya(storeid):
-    """
+    '''
     Get the data of the store with given storeid
 
     Parameters
@@ -43,7 +42,7 @@ def get_data_matsuya(storeid):
     dict with following keys
     'storeid','brand','name','lat','lon','postalCode','address',
     'business_hour1','business_hour2','business_hour3'
-    """
+    '''
 
     # Add the leading zeros to the code
     storeid = f'{storeid:010d}'
@@ -82,19 +81,20 @@ def get_data_matsuya(storeid):
     # Details of opening hours are available in the rendered website
     soup = BeautifulSoup(r.text, 'html.parser')
 
-    # First to third dd in the webpage are address, phone number and openinghours respectively
+    # 1st to 3rd dd tag are address, phone number and openinghours
     openinghours = soup.find_all('dd',
     {'class': 'col-xs-9 w_1_detail_2_1_2-td-value table-style-cell'})[2]
 
     business_hour = openinghours.text
 
     # Remove spaces and newline symbols
-    for old, new in [('\n', ''),(' ', '')]:
+    for old, new in [('\n', ''), (' ', '')]:
         business_hour = business_hour.replace(old, new)
 
     store_details['business_hour'] = business_hour
 
     return store_details
+
 
 def main():
     """
@@ -102,29 +102,30 @@ def main():
     """
 
     # Approximate minimum and maximum storeid are searched manually
-    storeid_min = 1
-    storeid_max = 1402
+    STOREID_MIN = 1
+    STOREID_MAX = 1500
 
-    outFile = r'../product/matsuya_rawdata.csv'
+    outFile = r'../product/matsuya_rawdata2.csv'
 
     # Keys from the get_data function
-    headers = ['storeid','brand','name','lat','lon','postalCode','address',
-                'business_hour']
+    headers = ['storeid', 'brand', 'name', 'lat', 'lon', 'postalCode',
+               'address', 'business_hour']
 
     with open(outFile, 'w', newline='') as csvfile:
 
-        writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',fieldnames=headers)
+        writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',
+                                fieldnames=headers)
 
         # Write the headers
         writer.writeheader()
 
-        for storeid in range(storeid_min,storeid_max+1):
+        for storeid in range(STOREID_MIN, STOREID_MAX+1):
 
             print(f"Processing {storeid}...")
 
             store_row = get_data_matsuya(storeid)
 
-            if store_row == None:
+            if store_row is None:
 
                 print(f"failed to request the page with storeid {storeid}")
                 continue
